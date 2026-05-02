@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Clock - Multiple Time Zones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, black, #1a0000);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(255, 0, 0, 0.3);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .clock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .clock-card {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(0, 0, 0, 0.5));
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .clock-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(255, 0, 0, 0.5);
+        }
+
+        .timezone-name {
+            font-size: 1.1rem;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .time {
+            font-size: 2rem;
+            color: #00ff00;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            font-family: 'Arial Black', sans-serif;
+            margin-bottom: 8px;
+        }
+
+        .date {
+            font-size: 0.9rem;
+            color: #cccccc;
+        }
+
+        .flag {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .utc-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 0, 0, 0.3);
+            font-size: 0.9rem;
+            color: #aaaaaa;
+        }
+
+        .last-updated {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #888888;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .clock-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .time {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⏰ World Clock <span style="color: #ff1744;">❤️</span></h1>
+        
+        <div class="clock-grid">
+            <!-- Saudi Arabia -->
+            <div class="clock-card">
+                <div class="flag">🇸🇦</div>
+                <div class="timezone-name">Saudi Arabia (Mecca)</div>
+                <div class="time" id="saudi-time">00:00:00</div>
+                <div class="date" id="saudi-date">Loading...</div>
+            </div>
+
+            <!-- South Korea -->
+            <div class="clock-card">
+                <div class="flag">🇰🇷</div>
+                <div class="timezone-name">South Korea (Seoul)</div>
+                <div class="time" id="korea-time">00:00:00</div>
+                <div class="date" id="korea-date">Loading...</div>
+            </div>
+
+            <!-- UTC -->
+            <div class="clock-card">
+                <div class="flag">🌍</div>
+                <div class="timezone-name">UTC (Universal Time)</div>
+                <div class="time" id="utc-time">00:00:00</div>
+                <div class="date" id="utc-date">Loading...</div>
+            </div>
+        </div>
+
+        <div class="utc-info">
+            <p>🕐 Real-time clock updating every second</p>
+            <p class="last-updated" id="last-updated">Last updated: Just now</p>
+        </div>
+    </div>
+
+    <script>
+        function updateClocks() {
+            const now = new Date();
+
+            // Saudi Arabia (UTC+3)
+            const saudiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Riyadh' }));
+            updateClockDisplay('saudi-time', 'saudi-date', saudiTime);
+
+            // South Korea (UTC+9)
+            const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+            updateClockDisplay('korea-time', 'korea-date', koreaTime);
+
+            // UTC
+            const utcTime = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+            updateClockDisplay('utc-time', 'utc-date', utcTime);
+
+            // Update last updated time
+            document.getElementById('last-updated').textContent = 'Last updated: ' + now.toLocaleTimeString();
+        }
+
+        function updateClockDisplay(timeId, dateId, dateObj) {
+            const hours = String(dateObj.getHours()).padStart(2, '0');
+            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+            const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+
+            document.getElementById(timeId).textContent = `${hours}:${minutes}:${seconds}`;
+
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            const dateString = dateObj.toLocaleDateString('en-US', options);
+            document.getElementById(dateId).textContent = dateString;
+        }
+
+        // Update clocks immediately and then every second
+        updateClocks();
+        setInterval(updateClocks, 1000);
+    </script>
+</body>
+</html>
